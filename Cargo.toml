@@ -1,0 +1,47 @@
+[package]
+name = "gnn_facade_cuda"
+version = "0.1.0"
+edition = "2021"
+authors = ["Matthew Abbott"]
+license = "MIT"
+description = "Graph Neural Network with Facade Pattern and CUDA/OpenCL acceleration"
+readme = "README.md"
+keywords = ["gnn", "graph-neural-network", "cuda", "opencl", "machine-learning", "deep-learning"]
+categories = ["science", "mathematics"]
+
+[lib]
+name = "gnn_facade_cuda"
+crate-type = ["lib", "cdylib"]
+
+[[bin]]
+name = "gnn_facade_cuda"
+path = "src/main.rs"
+required-features = []
+
+[dependencies]
+cudarc = { version = "0.12", features = ["driver", "nvrtc", "cuda-12000"], optional = true }
+opencl3 = { version = "0.9", optional = true }
+rand = "0.8"
+clap = { version = "4.4", features = ["derive"] }
+pyo3 = { version = "0.22", features = ["extension-module"], optional = true }
+napi = { version = "2", features = ["napi9"], optional = true }
+napi-derive = { version = "2", optional = true }
+
+[features]
+default = ["cuda", "opencl"]
+cuda = ["cudarc"]
+opencl = ["opencl3"]
+python = ["pyo3"]
+nodejs = ["napi", "napi-derive", "napi-build"]
+ffi = []
+
+[build-dependencies]
+napi-build = { version = "2", optional = true }
+
+[package.metadata.napi]
+package-name = "gnn-facade-cuda"
+export-name = "gnnFacadeCuda"
+
+[profile.release]
+opt-level = 3
+lto = true

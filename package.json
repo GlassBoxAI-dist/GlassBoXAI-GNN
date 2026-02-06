@@ -1,0 +1,48 @@
+{
+  "name": "gnn-facade-cuda",
+  "version": "0.1.0",
+  "description": "CUDA-accelerated Graph Neural Network with Facade Pattern",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "author": "Matthew Abbott",
+  "license": "MIT",
+  "keywords": [
+    "gnn",
+    "graph-neural-network",
+    "cuda",
+    "machine-learning",
+    "deep-learning",
+    "neural-network",
+    "gpu"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GlassBoxAI/GlassBoxAI-GNN"
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "*.node"
+  ],
+  "napi": {
+    "name": "gnn-facade-cuda",
+    "triples": {
+      "defaults": true,
+      "additional": [
+        "x86_64-unknown-linux-gnu"
+      ]
+    }
+  },
+  "engines": {
+    "node": ">= 16"
+  },
+  "scripts": {
+    "build": "napi build --platform --release --features nodejs --lib",
+    "build:debug": "napi build --platform --features nodejs --lib",
+    "prepublishOnly": "napi prepublish -t npm",
+    "test": "node test.js"
+  },
+  "devDependencies": {
+    "@napi-rs/cli": "^2.18.0"
+  }
+}

@@ -1,0 +1,39 @@
+[build-system]
+requires = ["maturin>=1.4,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "gnn_facade_cuda"
+version = "0.1.0"
+description = "CUDA-accelerated Graph Neural Network with Facade Pattern"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Matthew Abbott"}
+]
+keywords = ["gnn", "graph-neural-network", "cuda", "machine-learning", "deep-learning"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Rust",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+requires-python = ">=3.8"
+
+[project.urls]
+Homepage = "https://github.com/GlassBoxAI/GlassBoxAI-GNN"
+Repository = "https://github.com/GlassBoxAI/GlassBoxAI-GNN"
+
+[tool.maturin]
+features = ["python"]
+module-name = "gnn_facade_cuda"
+python-source = "python"
