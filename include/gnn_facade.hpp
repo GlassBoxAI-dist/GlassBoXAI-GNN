@@ -487,6 +487,24 @@ public:
     
     unsigned int getParameterCount() const { return gnn_get_parameter_count(handle_); }
 
+    /** @brief Detect best available backend (static) */
+    static Backend detectBackend() {
+        return static_cast<Backend>(gnn_detect_backend());
+    }
+
+    /** @brief Get the backend type */
+    Backend getBackendType() const {
+        return static_cast<Backend>(gnn_get_backend_type(handle_));
+    }
+
+    /** @brief Get edge endpoints */
+    std::optional<std::pair<unsigned int, unsigned int>> getEdgeEndpoints(unsigned int edgeIdx) const {
+        unsigned int src, tgt;
+        int result = gnn_get_edge_endpoints(handle_, edgeIdx, &src, &tgt);
+        if (result != GNN_OK) return std::nullopt;
+        return std::make_pair(src, tgt);
+    }
+
     /** @brief Get the active backend name ("cuda" or "opencl") */
     std::string getBackendName() const {
         std::vector<char> buffer(32);

@@ -638,6 +638,37 @@ int gnn_export_graph_to_json(
 );
 
 /**
+ * @brief Detect the best available GPU backend
+ *
+ * @return Backend type: GNN_BACKEND_CUDA (0), GNN_BACKEND_OPENCL (1), or GNN_BACKEND_AUTO (2)
+ */
+int gnn_detect_backend(void);
+
+/**
+ * @brief Get the backend type for a handle
+ *
+ * @param handle GNN handle
+ * @return Backend type: GNN_BACKEND_CUDA (0), GNN_BACKEND_OPENCL (1), or GNN_BACKEND_AUTO (2)
+ */
+int gnn_get_backend_type(const GnnHandle* handle);
+
+/**
+ * @brief Get edge endpoints (source and target node indices)
+ *
+ * @param handle GNN handle
+ * @param edge_idx Edge index
+ * @param source_out Pointer to store source node index
+ * @param target_out Pointer to store target node index
+ * @return GNN_OK on success, error code if edge not found
+ */
+int gnn_get_edge_endpoints(
+    const GnnHandle* handle,
+    unsigned int edge_idx,
+    unsigned int* source_out,
+    unsigned int* target_out
+);
+
+/**
  * @brief Get the active backend name
  *
  * @param handle GNN handle

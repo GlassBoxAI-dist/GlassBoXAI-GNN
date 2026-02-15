@@ -97,6 +97,13 @@ pub extern "C" fn gnn_create_with_backend(
     num_mp_layers: c_uint,
     backend: c_int,
 ) -> *mut GnnHandle {
+    if feature_size == 0 || hidden_size == 0 || output_size == 0 || num_mp_layers == 0 {
+        return ptr::null_mut();
+    }
+    if feature_size > 4096 || hidden_size > 4096 || output_size > 4096 || num_mp_layers > 64 {
+        return ptr::null_mut();
+    }
+
     match GnnFacade::with_backend(
         feature_size as usize,
         hidden_size as usize,
@@ -276,6 +283,10 @@ pub extern "C" fn gnn_add_edge(
     }
 
     let handle = unsafe { &mut *handle };
+    if features_len > 4096 {
+        return -1;
+    }
+
     let features_vec = if features.is_null() || features_len == 0 {
         vec![]
     } else {
@@ -384,6 +395,9 @@ pub extern "C" fn gnn_set_node_features(
     if handle.is_null() || features.is_null() {
         return GNN_ERROR_NULL_POINTER;
     }
+    if features_len > 4096 {
+        return GNN_ERROR_INVALID_ARGUMENT;
+    }
 
     let handle = unsafe { &mut *handle };
     let features_vec = unsafe { slice::from_raw_parts(features, features_len as usize).to_vec() };
@@ -438,6 +452,9 @@ pub extern "C" fn gnn_set_node_feature(
     if handle.is_null() {
         return GNN_ERROR_NULL_POINTER;
     }
+    if value.is_nan() || value.is_infinite() {
+        return GNN_ERROR_INVALID_ARGUMENT;
+    }
 
     let handle = unsafe { &mut *handle };
     handle.inner.set_node_feature(node_idx as usize, feature_idx as usize, value);
@@ -484,6 +501,9 @@ pub extern "C" fn gnn_set_edge_features(
 ) -> c_int {
     if handle.is_null() || features.is_null() {
         return GNN_ERROR_NULL_POINTER;
+    }
+    if features_len > 4096 {
+        return GNN_ERROR_INVALID_ARGUMENT;
     }
 
     let handle = unsafe { &mut *handle };
@@ -541,6 +561,9 @@ pub extern "C" fn gnn_predict(
     if handle.is_null() || output.is_null() {
         return -1;
     }
+    if output_len > 1048576 {
+        return -1;
+    }
 
     let handle = unsafe { &mut *handle };
     match handle.inner.predict() {
@@ -570,6 +593,9 @@ pub extern "C" fn gnn_train(
 ) -> c_int {
     if handle.is_null() || target.is_null() {
         return GNN_ERROR_NULL_POINTER;
+    }
+    if target_len > 1048576 {
+        return GNN_ERROR_INVALID_ARGUMENT;
     }
 
     let handle = unsafe { &mut *handle };
@@ -603,6 +629,9 @@ pub extern "C" fn gnn_train_multiple(
     if handle.is_null() || target.is_null() {
         return GNN_ERROR_NULL_POINTER;
     }
+    if target_len > 1048576 {
+        return GNN_ERROR_INVALID_ARGUMENT;
+    }
 
     let handle = unsafe { &mut *handle };
     let target_slice = unsafe { slice::from_raw_parts(target, target_len as usize) };
@@ -622,6 +651,9 @@ pub extern "C" fn gnn_train_multiple(
 pub extern "C" fn gnn_set_learning_rate(handle: *mut GnnHandle, lr: c_float) -> c_int {
     if handle.is_null() {
         return GNN_ERROR_NULL_POINTER;
+    }
+    if lr.is_nan() || lr.is_infinite() || lr < 0.0 {
+        return GNN_ERROR_INVALID_ARGUMENT;
     }
 
     let handle = unsafe { &mut *handle };
@@ -863,6 +895,9 @@ pub extern "C" fn gnn_apply_node_dropout(handle: *mut GnnHandle, rate: c_float) 
     if handle.is_null() {
         return GNN_ERROR_NULL_POINTER;
     }
+    if rate.is_nan() || rate.is_infinite() || rate < 0.0 || rate > 1.0 {
+        return GNN_ERROR_INVALID_ARGUMENT;
+    }
 
     let handle = unsafe { &mut *handle };
     handle.inner.apply_node_dropout(rate);
@@ -874,6 +909,9 @@ pub extern "C" fn gnn_apply_node_dropout(handle: *mut GnnHandle, rate: c_float) 
 pub extern "C" fn gnn_apply_edge_dropout(handle: *mut GnnHandle, rate: c_float) -> c_int {
     if handle.is_null() {
         return GNN_ERROR_NULL_POINTER;
+    }
+    if rate.is_nan() || rate.is_infinite() || rate < 0.0 || rate > 1.0 {
+        return GNN_ERROR_INVALID_ARGUMENT;
     }
 
     let handle = unsafe { &mut *handle };
@@ -924,6 +962,12 @@ pub extern "C" fn gnn_compute_page_rank(
     scores_len: c_uint,
 ) -> c_int {
     if handle.is_null() || scores_out.is_null() {
+        return -1;
+    }
+    if damping.is_nan() || damping.is_infinite() || damping < 0.0 || damping > 1.0 {
+        return -1;
+    }
+    if scores_len > 1048576 {
         return -1;
     }
 
@@ -981,7 +1025,7 @@ pub extern "C" fn gnn_get_architecture_summary(
     buffer: *mut c_char,
     buffer_len: c_uint,
 ) -> c_int {
-    if handle.is_null() || buffer.is_null() {
+    if handle.is_null() || buffer.is_null() || buffer_len == 0 {
         return -1;
     }
 
@@ -1015,7 +1059,7 @@ pub extern "C" fn gnn_export_graph_to_json(
     buffer: *mut c_char,
     buffer_len: c_uint,
 ) -> c_int {
-    if handle.is_null() || buffer.is_null() {
+    if handle.is_null() || buffer.is_null() || buffer_len == 0 {
         return -1;
     }
 
@@ -1037,6 +1081,68 @@ pub extern "C" fn gnn_export_graph_to_json(
     }
 }
 
+/// Detect the best available GPU backend
+///
+/// @returns Backend type: GNN_BACKEND_CUDA (0), GNN_BACKEND_OPENCL (1), or GNN_BACKEND_AUTO (2)
+#[no_mangle]
+pub extern "C" fn gnn_detect_backend() -> c_int {
+    let backend = crate::detect_backend();
+    match backend {
+        GpuBackendType::Cuda => GNN_BACKEND_CUDA,
+        GpuBackendType::OpenCL => GNN_BACKEND_OPENCL,
+        GpuBackendType::Auto => GNN_BACKEND_AUTO,
+    }
+}
+
+/// Get the backend type for a handle
+///
+/// @param handle GNN handle
+/// @returns Backend type: GNN_BACKEND_CUDA (0), GNN_BACKEND_OPENCL (1), or GNN_BACKEND_AUTO (2)
+#[no_mangle]
+pub extern "C" fn gnn_get_backend_type(handle: *const GnnHandle) -> c_int {
+    if handle.is_null() {
+        return GNN_BACKEND_AUTO;
+    }
+
+    let handle = unsafe { &*handle };
+    match handle.inner.get_backend_type() {
+        GpuBackendType::Cuda => GNN_BACKEND_CUDA,
+        GpuBackendType::OpenCL => GNN_BACKEND_OPENCL,
+        GpuBackendType::Auto => GNN_BACKEND_AUTO,
+    }
+}
+
+/// Get edge endpoints (source and target node indices)
+///
+/// @param handle GNN handle
+/// @param edge_idx Edge index
+/// @param source_out Pointer to store source node index
+/// @param target_out Pointer to store target node index
+/// @returns GNN_OK on success, GNN_ERROR_INVALID_ARGUMENT if edge not found
+#[no_mangle]
+pub extern "C" fn gnn_get_edge_endpoints(
+    handle: *const GnnHandle,
+    edge_idx: c_uint,
+    source_out: *mut c_uint,
+    target_out: *mut c_uint,
+) -> c_int {
+    if handle.is_null() || source_out.is_null() || target_out.is_null() {
+        return GNN_ERROR_NULL_POINTER;
+    }
+
+    let handle = unsafe { &*handle };
+    match handle.inner.get_edge_endpoints(edge_idx as usize) {
+        Some((src, tgt)) => {
+            unsafe {
+                *source_out = src as c_uint;
+                *target_out = tgt as c_uint;
+            }
+            GNN_OK
+        }
+        None => GNN_ERROR_INVALID_ARGUMENT,
+    }
+}
+
 /// Get the active backend name
 ///
 /// @param handle GNN handle
@@ -1049,7 +1155,7 @@ pub extern "C" fn gnn_get_backend_name(
     buffer: *mut c_char,
     buffer_len: c_uint,
 ) -> c_int {
-    if handle.is_null() || buffer.is_null() {
+    if handle.is_null() || buffer.is_null() || buffer_len == 0 {
         return -1;
     }
 

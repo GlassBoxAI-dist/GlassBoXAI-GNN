@@ -14,6 +14,8 @@
 [![Node.js](https://img.shields.io/badge/Node.js-16+-339933.svg)](https://nodejs.org/)
 [![Go](https://img.shields.io/badge/Go-1.21+-00ADD8.svg)](https://go.dev/)
 [![Julia](https://img.shields.io/badge/Julia-1.9+-9558B2.svg)](https://julialang.org/)
+[![C#](https://img.shields.io/badge/C%23-.NET%208.0-512BD4.svg)](https://dotnet.microsoft.com/)
+[![Zig](https://img.shields.io/badge/Zig-0.13+-F7A41D.svg)](https://ziglang.org/)
 [![Kani](https://img.shields.io/badge/Kani-Verified-brightgreen.svg)](https://model-checking.github.io/kani/)
 [![CISA Compliant](https://img.shields.io/badge/CISA-Secure%20by%20Design-blue.svg)](https://www.cisa.gov/securebydesign)
 
@@ -26,7 +28,7 @@ GlassBoxAI-GNN is a comprehensive, production-ready Graph Neural Network impleme
 - **Dual GPU backends**: CUDA (via cudarc) and OpenCL (via opencl3) with automatic detection
 - **Backend selection**: Choose CUDA, OpenCL, or auto-detect at runtime via CLI or API
 - **Facade pattern architecture**: Clean, unified API for graph neural network operations
-- **Multi-language bindings**: Rust, Python, Node.js/TypeScript, C, C++, Go, and Julia
+- **Multi-language bindings**: Rust, Python, Node.js/TypeScript, C, C++, Go, Julia, C#, and Zig
 - **Formal verification**: Kani-verified Rust implementation for memory safety guarantees
 - **CISA/NSA Secure by Design compliance**: Built following government cybersecurity standards
 
@@ -47,7 +49,9 @@ This project demonstrates enterprise-grade software engineering practices includ
    - [C/C++ Library](#cc-library)
    - [Go Package](#go-package)
    - [Julia Package](#julia-package)
-6. [Usage](#usage)
+   - [C# Package](#c-package)
+   - [Zig Package](#zig-package)
+   6. [Usage](#usage)
    - [Rust API](#rust-api)
    - [Python API](#python-api)
    - [Node.js API](#nodejs-api)
@@ -56,6 +60,8 @@ This project demonstrates enterprise-grade software engineering practices includ
    - [Julia API](#julia-api)
    - [C API](#c-api)
    - [C++ API](#c-api-1)
+   - [C# API](#c-api-2)
+   - [Zig API](#zig-api)
    - [CLI Reference](#cli-reference)
 7. [API Reference](#api-reference)
 8. [Formal Verification with Kani](#formal-verification-with-kani)
@@ -99,6 +105,8 @@ This project demonstrates enterprise-grade software engineering practices includ
 | **C++** | FFI | RAII wrapper with exception handling |
 | **Go** | cgo | Package with idiomatic Go API |
 | **Julia** | ccall | Package with Julia-native conventions |
+| **C#** | P/Invoke | .NET package with IDisposable pattern |
+| **Zig** | C FFI | Package with Zig error handling |
 
 ### Safety & Security
 
@@ -136,20 +144,19 @@ This project demonstrates enterprise-grade software engineering practices includ
 │  │ Feature: cuda            │ │ Feature: opencl              │  │
 │  └──────────────────────────┘ └──────────────────────────────┘  │
 │                                                                 │
-│  ┌───────────┐ ┌───────────┐ ┌───────────┐ ┌────────────────┐  │
-│  │  Python   │ │  Node.js  │ │    Go     │ │     Julia      │  │
-│  ├───────────┤ ├───────────┤ ├───────────┤ ├────────────────┤  │
-│  │ PyO3      │ │ napi-rs   │ │ cgo FFI   │ │ ccall FFI      │  │
-│  │ maturin   │ │ TypeScript│ │ gnn.go    │ │ GnnFacadeCuda  │  │
-│  │           │ │ defs      │ │ gnn_test  │ │ runtests.jl    │  │
-│  └───────────┘ └───────────┘ └───────────┘ └────────────────┘  │
+│  ┌────────┐ ┌────────┐ ┌──────┐ ┌───────┐ ┌──────┐ ┌──────┐  │
+│  │ Python │ │Node.js │ │  Go  │ │ Julia │ │  C#  │ │ Zig  │  │
+│  ├────────┤ ├────────┤ ├──────┤ ├───────┤ ├──────┤ ├──────┤  │
+│  │ PyO3   │ │napi-rs │ │ cgo  │ │ ccall │ │ P/I  │ │C FFI │  │
+│  └────────┘ └────────┘ └──────┘ └───────┘ └──────┘ └──────┘  │
 │                                                                 │
 │  ┌───────────┐ ┌───────────┐ ┌──────────────────────────────┐  │
 │  │   C API   │ │  C++ API  │ │     Kani Formal Proofs       │  │
 │  ├───────────┤ ├───────────┤ ├──────────────────────────────┤  │
-│  │ gnn_      │ │ gnn_      │ │ 19 proof harnesses           │  │
-│  │ facade.h  │ │ facade.hpp│ │ 76 unit tests                │  │
-│  └───────────┘ └───────────┘ └──────────────────────────────┘  │
+│  │ gnn_      │ │ gnn_      │ │ 234 total verifications      │  │
+│  │ facade.h  │ │ facade.hpp│ │ (19 proofs + 76 unit tests   │  │
+│  └───────────┘ └───────────┘ │  + FFI/CUDA/OpenCL proofs)   │  │
+│                               └──────────────────────────────┘  │
 │                                                                 │
 │  ┌─────────────────────────────────────────────────────────────┐│
 │  │                    Shared Features                          ││
@@ -210,6 +217,23 @@ GlassBoxAI-GNN/
 │       └── test/
 │           └── runtests.jl        # Julia tests
 │
+├── csharp/                        # C# wrapper
+│   ├── GnnFacadeCuda/
+│   │   ├── GnnFacade.cs           # .NET bindings (P/Invoke)
+│   │   ├── NativeMethods.cs       # P/Invoke declarations
+│   │   └── GnnFacadeCuda.csproj   # .NET project file
+│   └── example/
+│       ├── Program.cs             # C# usage example
+│       └── example.csproj
+│
+├── zig/                           # Zig wrapper
+│   ├── src/
+│   │   └── gnn.zig                # Zig bindings (C FFI)
+│   ├── example/
+│   │   └── main.zig               # Zig usage example
+│   ├── build.zig                  # Build configuration
+│   └── build.zig.zon              # Build dependencies
+│
 ├── gui/                           # Qt-based GUI (optional)
 │   ├── Cargo.toml
 │   ├── build.rs
@@ -226,6 +250,11 @@ GlassBoxAI-GNN/
 │   │   └── lib.rs
 │   ├── README.md
 │   └── VERIFICATION_REPORT.md
+│
+├── src/kani/                      # In-tree verification harnesses
+│   ├── ffi_c_boundary.rs          # FFI C boundary safety (55 proofs)
+│   ├── ffi_cuda_boundary.rs       # CUDA backend FFI safety (42 proofs)
+│   └── ffi_opencl_boundary.rs     # OpenCL backend FFI safety (42 proofs)
 │
 ├── license.md                     # MIT License
 └── README.md                      # This file
@@ -258,6 +287,8 @@ GlassBoxAI-GNN/
 | **@napi-rs/cli** | 2.18+ | Building Node.js native addon |
 | **Go** | 1.21+ | Go bindings |
 | **Julia** | 1.9+ | Julia bindings |
+| **C# / .NET SDK** | 8.0+ | C# bindings |
+| **Zig** | 0.13+ | Zig bindings |
 | **GCC/G++** | 11+ | C/C++ compilation |
 | **Kani** | 0.67+ | Formal verification |
 | **Qt 6** | 6.x | GUI version |
@@ -377,6 +408,35 @@ cd("path/to/GlassBoxAI-GNN/julia")
 using Pkg
 Pkg.activate("GnnFacadeCuda")
 using GnnFacadeCuda
+```
+
+### **C# Package**
+
+```bash
+# Build the C library first
+cargo build --release --lib --features ffi
+
+# Build the C# project
+cd csharp/GnnFacadeCuda
+dotnet build
+
+# Run the example
+cd ../example
+LD_LIBRARY_PATH=../../target/release dotnet run
+```
+
+### **Zig Package**
+
+```bash
+# Build the C library first
+cargo build --release --lib --features ffi
+
+# Build the Zig example
+cd zig
+zig build
+
+# Run the example
+LD_LIBRARY_PATH=../target/release zig-out/bin/gnn-example
 ```
 
 ### **Build All**
@@ -807,6 +867,92 @@ int main() {
 }
 ```
 
+### **C# API**
+
+```csharp
+using GnnFacadeCuda;
+
+using var gnn = new GnnFacade(3, 16, 2, 2);
+
+Console.WriteLine($"Backend: {gnn.BackendName}");
+Console.WriteLine($"Parameters: {gnn.ParameterCount}");
+
+// Create a graph with 5 nodes
+gnn.CreateEmptyGraph(5, 3);
+
+// Add edges
+gnn.AddEdge(0, 1);
+gnn.AddEdge(1, 2);
+gnn.AddEdge(2, 3);
+
+// Set node features
+gnn.SetNodeFeatures(0, new float[] { 1.0f, 0.5f, 0.2f });
+gnn.SetNodeFeatures(1, new float[] { 0.8f, 0.3f, 0.1f });
+
+// Make predictions
+float[] prediction = gnn.Predict();
+Console.WriteLine($"Prediction: [{prediction[0]}, {prediction[1]}]");
+
+// Train
+float loss = gnn.Train(new float[] { 0.5f, 0.5f });
+Console.WriteLine($"Loss: {loss}");
+
+// Save and load
+gnn.SaveModel("model.bin");
+using var loaded = GnnFacade.Load("model.bin");
+
+// PageRank
+float[] ranks = gnn.ComputePageRank();
+Console.WriteLine($"PageRank: [{string.Join(", ", ranks)}]");
+```
+
+### **Zig API**
+
+```zig
+const std = @import("std");
+const gnn = @import("gnn");
+
+pub fn main() !void {
+    const stdout = std.io.getStdOut().writer();
+
+    var facade = try gnn.GnnFacade.init(3, 16, 2, 2, .auto);
+    defer facade.deinit();
+
+    // Create a graph
+    facade.createEmptyGraph(5, 3);
+    _ = try facade.addEdge(0, 1, null);
+    _ = try facade.addEdge(1, 2, null);
+    _ = try facade.addEdge(2, 3, null);
+
+    // Set node features
+    facade.setNodeFeatures(0, &.{ 1.0, 0.5, 0.2 });
+    facade.setNodeFeatures(1, &.{ 0.8, 0.3, 0.1 });
+
+    // Make predictions
+    var output_buf: [2]f32 = undefined;
+    const prediction = try facade.predict(&output_buf);
+    try stdout.print("Prediction: [{d}, {d}]\n", .{ prediction[0], prediction[1] });
+
+    // Train
+    const target = [_]f32{ 0.5, 0.5 };
+    const loss = try facade.train(&target);
+    try stdout.print("Loss: {d}\n", .{loss});
+
+    // Save
+    try facade.saveModel("model.bin");
+
+    // PageRank
+    var rank_buf: [5]f32 = undefined;
+    const scores = facade.computePageRank(0.85, 20, &rank_buf);
+    try stdout.print("PageRank: [", .{});
+    for (scores, 0..) |score, idx| {
+        if (idx > 0) try stdout.print(", ", .{});
+        try stdout.print("{d}", .{score});
+    }
+    try stdout.print("]\n", .{});
+}
+```
+
 ---
 
 ### **CLI Reference**
@@ -968,41 +1114,11 @@ The Rust implementation includes **Kani formal verification proofs** that mathem
 |--------|-------|
 | **Unit Tests** | 76 |
 | **Kani Proof Harnesses** | 19 |
-| **Total Verifications** | **95** |
+| **In-tree FFI C Boundary Proofs** | 55 |
+| **In-tree CUDA Backend Proofs** | 42 |
+| **In-tree OpenCL Backend Proofs** | 42 |
+| **Total Verifications** | **234** |
 | **Failures** | 0 |
-
-### Kani Proof Harnesses
-
-#### Node Feature Access (3 proofs)
-- `proof_get_node_feature_never_panics` ✓
-- `proof_set_node_feature_never_panics` ✓
-- `proof_get_node_features_never_panics` ✓
-
-#### Edge Operations (5 proofs)
-- `proof_get_edge_bounds_safe` ✓
-- `proof_add_edge_bounds_checked` ✓
-- `proof_has_edge_never_panics` ✓
-- `proof_find_edge_index_never_panics` ✓
-- `proof_remove_edge_never_panics` ✓
-
-#### Adjacency List (3 proofs)
-- `proof_get_neighbors_never_panics` ✓
-- `proof_get_in_degree_never_panics` ✓
-- `proof_get_out_degree_never_panics` ✓
-
-#### Node Mask Operations (2 proofs)
-- `proof_node_mask_get_set_never_panic` ✓
-- `proof_node_mask_toggle_never_panics` ✓
-
-#### Edge Mask Operations (2 proofs)
-- `proof_edge_mask_get_set_never_panic` ✓
-- `proof_edge_mask_remove_never_panics` ✓
-
-#### Buffer Index Validation (4 proofs)
-- `proof_buffer_validator_node_correctness` ✓
-- `proof_buffer_validator_edge_correctness` ✓
-- `proof_node_feature_offset_bounds` ✓
-- `proof_node_embedding_offset_bounds` ✓
 
 ### Running Kani Verification
 
@@ -1027,6 +1143,150 @@ Traditional testing can only verify specific test cases. Formal verification wit
 - **Mathematically proves** absence of panics, buffer overflows, and undefined behavior
 - **Catches edge cases** that random testing might miss
 - **Provides cryptographic-level assurance** for safety-critical code
+
+### Kani Proof Harnesses (19 proofs)
+
+#### Node Feature Access (3 proofs)
+- `proof_get_node_feature_never_panics`
+- `proof_set_node_feature_never_panics`
+- `proof_get_node_features_never_panics`
+
+#### Edge Operations (5 proofs)
+- `proof_get_edge_bounds_safe`
+- `proof_add_edge_bounds_checked`
+- `proof_has_edge_never_panics`
+- `proof_find_edge_index_never_panics`
+- `proof_remove_edge_never_panics`
+
+#### Adjacency List (3 proofs)
+- `proof_get_neighbors_never_panics`
+- `proof_get_in_degree_never_panics`
+- `proof_get_out_degree_never_panics`
+
+#### Node Mask Operations (2 proofs)
+- `proof_node_mask_get_set_never_panic`
+- `proof_node_mask_toggle_never_panics`
+
+#### Edge Mask Operations (2 proofs)
+- `proof_edge_mask_get_set_never_panic`
+- `proof_edge_mask_remove_never_panics`
+
+#### Buffer Index Validation (4 proofs)
+- `proof_buffer_validator_node_correctness`
+- `proof_buffer_validator_edge_correctness`
+- `proof_node_feature_offset_bounds`
+- `proof_node_embedding_offset_bounds`
+
+### FFI C Boundary Safety (Category 16)
+
+Located in `src/kani/ffi_c_boundary.rs` — 55 Kani proofs covering:
+
+#### A. Unsigned Integer Validation
+- `verify_ffi_cuint_positive_rejects_zero` — Zero c_uint rejected where positive required
+- `verify_ffi_cuint_as_usize_always_safe` — c_uint → usize always safe
+- `verify_ffi_cuint_max_enforced` — Upper bound validation
+- `verify_ffi_len_validates_range` — Array length range validation
+
+#### B. Output Buffer Overflow Prevention
+- `verify_ffi_output_write_bounded_by_capacity` — Write never exceeds buffer capacity
+- `verify_ffi_predict_output_bounded` — Predict output bounded
+- `verify_ffi_zero_buffer_len_rejected` — Zero buffer length rejected for string output
+- `verify_ffi_string_copy_bounded` — String copy bounded by buffer
+
+#### C. NaN/Infinity Parameter Rejection
+- `verify_ffi_f32_param_rejects_special_values` — NaN/Inf rejected at boundary
+- `verify_ffi_learning_rate_rejects_nan/infinity/negative` — LR validation
+- `verify_ffi_learning_rate_accepts_valid` — Valid LR accepted
+- `verify_ffi_dropout_rate_validated` — Dropout [0,1] range validated
+- `verify_ffi_damping_factor_validated` — PageRank damping [0,1] validated
+- `verify_ffi_node_feature_nan/inf_rejected` — Node feature NaN/Inf rejected
+
+#### D. Backend Enum Validation
+- `verify_ffi_backend_enum_validation` — Backend int validated (0-2)
+- `verify_ffi_backend_negative_handled` — Negative backend rejected
+
+#### E. GNN Create Preconditions
+- `verify_ffi_create_rejects_zero_*` — Zero sizes rejected for all 4 params
+- `verify_ffi_create_rejects_oversized/excessive_*` — Upper bounds enforced
+- `verify_ffi_create_pipeline_all_inputs` — End-to-end create validation
+
+#### F. Array Length Validation
+- `verify_ffi_feature_array_len_bounded` — Feature arrays bounded at 4096
+- `verify_ffi_train_target_len_bounded` — Train target bounded at 1M
+- `verify_ffi_predict_output_len_bounded` — Predict output bounded
+
+#### G. Graph Structure Bounds
+- `verify_ffi_node/edge_index_bounded` — Index bounds checked
+- `verify_ffi_add_edge_validates_node_bounds` — Edge endpoint validation
+- `verify_ffi_neighbor_access_bounded` — Neighbor access safe
+
+#### H. Node/Edge Mask Validation
+- `verify_ffi_node/edge_mask_oob_safe` — OOB mask access returns safe default
+- `verify_ffi_edge_mask_add_respects_limit` — MAX_EDGES limit enforced
+
+#### I. No-Panic Guarantee
+- `verify_ffi_all_validators_no_panic` — All validators safe for any input
+
+#### J. ABI Type Compatibility
+- `verify_ffi_f32/u32/i32_abi_compatibility` — Size and alignment for C ABI
+
+#### K. Input Array NaN/Infinity Detection
+- `verify_ffi_nan/inf_in_f32_array_detectable` — NaN/Inf detectable in arrays
+
+#### L. Resource Limits
+- `verify_ffi_feature/train_allocation_bounded` — Memory bounded
+- `verify_ffi_graph_node/edge_limit_enforced` — Graph limits enforced
+
+#### M. Setter Value Validation
+- `verify_ffi_setter_rejects_nan/infinity` — NaN/Inf rejected
+- `verify_ffi_setter_accepts_valid_f32` — Valid values accepted
+- `verify_ffi_dropout_setter_rejects_over_one/accepts_valid` — Range enforced
+
+#### N. End-to-End Pipeline Validation
+- `verify_ffi_complete_predict/train/create/page_rank_pipeline` — Full pipelines
+
+#### O. Buffer Validator Proofs
+- `verify_ffi_buffer_validator_node/edge_index` — Index validation
+- `verify_ffi_buffer_validator_feature/embedding_offset_safe` — Offset calculations
+
+### CUDA Backend FFI Safety (Category 17)
+
+Located in `src/kani/ffi_cuda_boundary.rs` — 42 Kani proofs + unit tests across 15 categories (A–O):
+
+- Layer buffer size correctness (weight, bias, gradient)
+- CUDA grid/block dimension safety for forward, backward, input grad kernels
+- Weight index validity for flat buffers (weights and messages)
+- Transfer size non-zero and f32-aligned
+- Node embedding buffer sizing (MAX_NODES × hidden_size)
+- Message buffer sizing (MAX_EDGES × hidden_size)
+- Kernel launch parameter overflow prevention
+- Aggregation buffer sizing and index validity
+- Graph readout buffer safety and grid dimensions
+- Gradient buffer sizing (output gradient and target match)
+- Neighbor offset/count buffer safety
+- No-panic guarantee for all dimension calculations
+- ABI type compatibility for CUDA interop (f32, i32, u32)
+- End-to-end forward pass buffer chain (message→update→readout→output)
+
+### OpenCL Backend FFI Safety (Category 18)
+
+Located in `src/kani/ffi_opencl_boundary.rs` — 42 Kani proofs + unit tests across 15 categories (A–O):
+
+- Layer buffer size correctness for clCreateBuffer
+- OpenCL global/local work size safety (divisible, covers all items)
+- Weight index validity for flat OpenCL buffers
+- Transfer alignment for clEnqueueRead/WriteBuffer
+- cl_float/cl_int alignment for OpenCL interop
+- Node embedding buffer sizing for OpenCL
+- Message buffer sizing for OpenCL
+- Work group size power-of-two property and device limits
+- Aggregation buffer sizing for OpenCL
+- Graph readout buffer and readout work size
+- Gradient buffer sizing for OpenCL
+- Neighbor offset/count buffer for OpenCL
+- No-panic guarantee for all work size calculations
+- ABI type compatibility for OpenCL interop
+- End-to-end forward pass buffer chain adapted for OpenCL
 
 ---
 
@@ -1062,7 +1322,7 @@ This project follows **CISA (Cybersecurity and Infrastructure Security Agency)**
 
 This codebase has been developed following secure software development lifecycle (SSDLC) practices and demonstrates:
 
-- **95 formal verifications passed** (76 unit tests + 19 Kani proofs)
+- **234 formal verifications passed** (76 unit tests + 19 Kani proofs + 139 in-tree FFI/CUDA/OpenCL proofs)
 - **Zero warnings** compilation across all implementations
 - **Consistent API** across all language bindings
 - **Production-ready** code quality
