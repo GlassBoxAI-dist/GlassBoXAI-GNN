@@ -1,3 +1,5 @@
+//! @file
+//! @ingroup GNN_Internal_Logic
 /*
  * MIT License
  *
@@ -1176,3 +1178,4 @@ pub extern "C" fn gnn_get_backend_name(
         Err(_) => -1,
     }
 }
+

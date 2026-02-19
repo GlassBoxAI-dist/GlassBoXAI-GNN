@@ -1,3 +1,5 @@
+//! @file
+//! @ingroup GNN_Internal_Logic
 /*
  * MIT License
  *
@@ -537,6 +539,31 @@ impl PyGnnFacade {
         self.inner.export_graph_to_json()
     }
 
+    /// Get the backend type currently in use
+    ///
+    /// Returns:
+    ///     int: 0 = CUDA, 1 = OpenCL, 2 = Auto
+    fn get_backend_type(&self) -> i32 {
+        match self.inner.get_backend_type() {
+            GpuBackendType::Cuda => 0,
+            GpuBackendType::OpenCL => 1,
+            GpuBackendType::Auto => 2,
+        }
+    }
+
+    /// Detect the best available GPU backend without requiring a GNN instance
+    ///
+    /// Returns:
+    ///     int: 0 = CUDA, 1 = OpenCL, 2 = Auto
+    #[staticmethod]
+    fn detect_backend() -> i32 {
+        match crate::detect_backend() {
+            GpuBackendType::Cuda => 0,
+            GpuBackendType::OpenCL => 1,
+            GpuBackendType::Auto => 2,
+        }
+    }
+
     fn __repr__(&self) -> String {
         format!(
             "GnnFacade(feature_size={}, hidden_size={}, output_size={}, mp_layers={}, nodes={}, edges={})",
@@ -591,3 +618,4 @@ pub fn gnn_facade_cuda(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyGradientFlowInfo>()?;
     Ok(())
 }
+

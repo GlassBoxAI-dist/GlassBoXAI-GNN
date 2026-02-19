@@ -1,3 +1,5 @@
+//! @file
+//! @ingroup GNN_Core_Verified
 /*
  * MIT License
  *
@@ -1126,3 +1128,4 @@ mod tests {
         assert_eq!(graph.get_node_feature(5, 50), 550.0);
     }
 }
+

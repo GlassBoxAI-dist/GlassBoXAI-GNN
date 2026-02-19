@@ -1,3 +1,5 @@
+//! @file
+//! @ingroup GNN_Internal_Logic
 /*
  * MIT License
  *
@@ -1013,3 +1015,4 @@ impl qobject::GnnBridge {
         self.as_mut().set_status_message(QString::from("Applied manual node features"));
     }
 }
+

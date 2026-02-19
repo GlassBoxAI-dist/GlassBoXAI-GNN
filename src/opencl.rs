@@ -1,3 +1,5 @@
+//! @file
+//! @ingroup GNN_GPU_Accelerated
 /*
  * MIT License
  *
@@ -916,3 +918,4 @@ pub fn is_opencl_available() -> bool {
             .map(|d| !d.is_empty())
             .unwrap_or(false)
 }
+

@@ -1,4 +1,8 @@
 /**
+ * @file
+ * @ingroup GNN_Internal_Logic
+ */
+/**
  * GlassBoxAI GNN - CUDA-accelerated Graph Neural Network
  *
  * This module provides Node.js bindings for a high-performance

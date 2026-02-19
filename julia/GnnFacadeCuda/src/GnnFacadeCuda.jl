@@ -1,3 +1,5 @@
+## @file
+## @ingroup GNN_Wrappers
 # MIT License
 #
 # Copyright (c) 2025 Matthew Abbott
@@ -69,7 +71,8 @@ export GnnFacade, GradientFlowInfo, ModelHeader,
        compute_page_rank, get_gradient_flow, get_parameter_count,
        get_architecture_summary, export_graph_to_json,
        # Backend
-       get_backend_name,
+       get_backend_name, get_backend_type, detect_backend,
+       get_edge_endpoints,
        GNN_BACKEND_CUDA, GNN_BACKEND_OPENCL, GNN_BACKEND_AUTO
 
 # Library path - can be overridden by setting GNN_LIBRARY_PATH environment variable
@@ -1016,6 +1019,51 @@ function Base.show(io::IO, header::ModelHeader)
     print(io, "ModelHeader(features=$(header.feature_size), ",
           "hidden=$(header.hidden_size), output=$(header.output_size), ",
           "mp_layers=$(header.mp_layers), lr=$(header.learning_rate))")
+end
+
+"""
+    detect_backend() -> Int
+
+Detect the best available GPU backend without requiring a GNN handle.
+Returns one of: `GNN_BACKEND_CUDA` (0), `GNN_BACKEND_OPENCL` (1), `GNN_BACKEND_AUTO` (2).
+"""
+function detect_backend()
+    return Int(ccall((:gnn_detect_backend, libgnn[]), Cint, ()))
+end
+
+"""
+    get_backend_type(gnn::GnnFacade) -> Int
+
+Get the backend type currently used by this GNN instance.
+Returns one of: `GNN_BACKEND_CUDA` (0), `GNN_BACKEND_OPENCL` (1), `GNN_BACKEND_AUTO` (2).
+"""
+function get_backend_type(gnn::GnnFacade)
+    return Int(ccall((:gnn_get_backend_type, libgnn[]), Cint,
+                     (Ptr{Cvoid},), gnn.handle))
+end
+
+"""
+    get_edge_endpoints(gnn::GnnFacade, edge_idx::Integer) -> Union{Tuple{Int,Int}, Nothing}
+
+Get the source and target node indices of an edge.
+Returns `(source, target)` on success, or `nothing` if the edge does not exist.
+
+# Example
+```julia
+endpoints = get_edge_endpoints(gnn, 0)
+if endpoints !== nothing
+    src, tgt = endpoints
+    println("Edge 0: \$src → \$tgt")
+end
+```
+"""
+function get_edge_endpoints(gnn::GnnFacade, edge_idx::Integer)
+    source = Ref{Cuint}(0)
+    target = Ref{Cuint}(0)
+    result = ccall((:gnn_get_edge_endpoints, libgnn[]), Cint,
+                   (Ptr{Cvoid}, Cuint, Ptr{Cuint}, Ptr{Cuint}),
+                   gnn.handle, edge_idx, source, target)
+    return result >= 0 ? (Int(source[]), Int(target[])) : nothing
 end
 
 end # module

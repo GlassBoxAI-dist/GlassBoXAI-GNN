@@ -1,4 +1,8 @@
 /**
+ * @file
+ * @ingroup GNN_Internal_Logic
+ */
+/**
  * @file gnn_facade.hpp
  * @brief GlassBoxAI GNN - CUDA/OpenCL-accelerated Graph Neural Network C++ API
  *

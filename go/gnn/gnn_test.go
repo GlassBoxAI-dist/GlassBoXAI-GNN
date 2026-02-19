@@ -1,3 +1,7 @@
+/**
+ * @file
+ * @ingroup GNN_Wrappers
+ */
 package gnn
 
 import (

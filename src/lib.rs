@@ -1,3 +1,5 @@
+//! @file
+//! @ingroup GNN_Internal_Logic
 /*
  * MIT License
  *
@@ -1701,3 +1703,4 @@ pub mod nodejs;
 pub mod ffi;
 
 pub mod kani;
+

@@ -1,3 +1,7 @@
+/**
+ * @file
+ * @ingroup GNN_Wrappers
+ */
 // Example usage of the GNN Go package
 package main
 

@@ -1,3 +1,5 @@
+//! @file
+//! @ingroup GNN_Core_Verified
 /*
  * MIT License
  *
@@ -657,3 +659,4 @@ mod tests {
         assert!(bad_offset.is_none());
     }
 }
+

@@ -1,3 +1,5 @@
+//! @file
+//! @ingroup GNN_Wrappers
 /*
  * MIT License
  *
@@ -569,3 +571,4 @@ pub struct EdgeEndpoints {
     pub source: u32,
     pub target: u32,
 }
+

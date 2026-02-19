@@ -1,3 +1,5 @@
+//! @file
+//! @ingroup GNN_Internal_Logic
 /*
  * MIT License
  *
@@ -39,3 +41,4 @@ fn main() {
         app.exec();
     }
 }
+

@@ -1,3 +1,5 @@
+## @file
+## @ingroup GNN_Wrappers
 """Type stubs for gnn_facade_cuda"""
 
 from typing import List, Optional, Tuple

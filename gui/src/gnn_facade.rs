@@ -1,3 +1,5 @@
+//! @file
+//! @ingroup GNN_Internal_Logic
 /*
  * MIT License
  *
@@ -1088,3 +1090,4 @@ impl CudaGnnFacade {
         s
     }
 }
+

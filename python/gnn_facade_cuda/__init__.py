@@ -1,3 +1,5 @@
+## @file
+## @ingroup GNN_Wrappers
 """
 GlassBoxAI GNN - CUDA-accelerated Graph Neural Network
 

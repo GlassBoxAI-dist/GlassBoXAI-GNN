@@ -1,3 +1,7 @@
+/**
+ * @file
+ * @ingroup GNN_Wrappers
+ */
 // Package gnn provides Go bindings for the GlassBoxAI GNN library.
 //
 // This package wraps the GPU-accelerated Graph Neural Network library
@@ -611,4 +615,29 @@ func (g *GNN) ExportGraphToJSON() string {
 		return string(buffer[:length])
 	}
 	return "{}"
+}
+
+// DetectBackend detects the best available GPU backend without requiring
+// an existing GNN handle. Returns BackendCUDA, BackendOpenCL, or BackendAuto.
+func DetectBackend() Backend {
+	return Backend(C.gnn_detect_backend())
+}
+
+// GetBackendType returns the backend type currently in use by this GNN.
+func (g *GNN) GetBackendType() Backend {
+	return Backend(C.gnn_get_backend_type(g.handle))
+}
+
+// GetEdgeEndpoints returns the source and target node indices of an edge.
+// Returns (source, target, true) on success, (0, 0, false) if the edge
+// does not exist.
+func (g *GNN) GetEdgeEndpoints(edgeIdx uint) (uint, uint, bool) {
+	var source, target C.uint
+	result := C.gnn_get_edge_endpoints(
+		g.handle, C.uint(edgeIdx), &source, &target,
+	)
+	if result < 0 {
+		return 0, 0, false
+	}
+	return uint(source), uint(target), true
 }
